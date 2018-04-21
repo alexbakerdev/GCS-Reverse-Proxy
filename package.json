@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A google cloud storage reverse proxy. For hosting private static sites using google cloud storage.",
   "main": "index.js",
+  "pirvate": true,
   "engines": {
     "node": ">=8.11.1"
   },
