@@ -12,6 +12,8 @@ This reverse proxy micro service will behave as a simple http server for an arra
 
 Accessing private gcs objects via the browser requires special tokens that are encoded into the url. This will break most (if not all) static sites, since they can't generate these tokens or predict the uri of any assets it requests or links to. However making a storage object public means there is no way to restrict access to it.
 
+This reverse proxy will serve a private object over http at the expected (relative), uri and won't restrict access to these objects at all. However, by putting this server behind another reverse proxy, such as nginx or putting it on a vpn, you'll be able to control access in a way that bests suits your needs.
+
 ## Getting Started
 
 ### Prerequisites
