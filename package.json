@@ -8,7 +8,7 @@
     "node": ">=8.11.1"
   },
   "scripts": {
-    "start": "micro - ${PORT:-3000}",
+    "start": "micro -p ${PORT:-3000}",
     "dev": "micro-dev"
   },
   "author": "Alex Baker me@xanderite.io",
