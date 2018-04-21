@@ -1,0 +1,15 @@
+{
+  "name": "gcs-reverse-proxy",
+  "version": "1.0.0",
+  "description": "A google cloud storage reverse proxy. For hosting private static sites using google cloud storage.",
+  "main": "index.js",
+  "engines": {
+    "node": ">=8.11.1"
+  },
+  "scripts": {
+    "start": "micro - ${PORT:-3000}",
+    "dev": "micro-dev"
+  },
+  "author": "Alex Baker me@xanderite.io",
+  "license": "MIT"
+}
