@@ -12,5 +12,13 @@
     "dev": "micro-dev"
   },
   "author": "Alex Baker me@xanderite.io",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/storage": "^1.6.0",
+    "micro": "^9.1.4",
+    "micro-get": "^0.1.1"
+  },
+  "devDependencies": {
+    "micro-dev": "^2.2.2"
+  }
 }
