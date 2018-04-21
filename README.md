@@ -4,7 +4,13 @@ A google cloud storage reverse proxy. For hosting private static sites using pri
 
 ### Motivation
 
-I wanted to be able to serve private static sites from private objects in gcs buckets. This enables us to host sensitive company information, such as code documentation, and restrict access as needed using other tools, such as nginx, caddy or a vpn.
+You want to serve static sites using your gcs buckets, but you want to restrict access to them.
+
+This reverse proxy micro service will behave as a simple http server for an array of gcs buckets. Then you can use any appropriate method to restrict access to it. E.g. Putting it behind nginx, caddy or a vpn.
+
+#### Wait why do I need this?
+
+Accessing private gcs objects via the browser requires special tokens that are encoded into the url. This will break most (if not all) static sites, since they can't generate these tokens or predict the uri of any assets it requests or links to. However making a storage object public means there is no way to restrict access to it.
 
 ## Getting Started
 
@@ -28,7 +34,6 @@ The server will throw unless one or more TARGET_BUCKETS are defined.
 ### Run
 
 ```
-nvm use
 npm install
 TARGET_BUCKETS="bucket-name" npm start
 ```
