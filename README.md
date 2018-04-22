@@ -40,6 +40,17 @@ npm install
 TARGET_BUCKETS="bucket-name" npm start
 ```
 
+### Usage
+
+Once the server is up and running, to access a private object in a bucket should be done by making a get request to:
+```
+<proxy-host>:<proxy-port>/<bucket-name>/<file-path>
+```
+
+If the file path exists in the bucket, and the server has premission to read it, the reverse proxy will send its contents as a response. If for any reason the file is not retrievable from the bucket then the server will return a 404.
+
+If the bucket requested is not in the list of TARGET_BUCKETS then it will return a 403, regardless of its a real bucket or not.
+
 ### Dev
 
 This project uses [micro](https://github.com/zeit/micro), which means we get to use the excellent [micro-dev](https://github.com/zeit/micro-dev) tools, in development.
