@@ -72,14 +72,20 @@ module.exports = handleErrors(
         const bucket = bucketRef[bucketName];
         if (bucket) {
           const file = bucket.file(filePath);
-          const readStream = file.createReadStream()
           const [ meta ] = await file.getMetadata();
 
           res.setHeader('Content-Type', meta.contentType);
           res.setHeader('Content-Length', meta.size)
 
-          send(res, 200, readStream);
-          return
+          // use streams if >~ 2MB/s to lower memory usage.
+          if (meta.size > 2000000) {          
+            send(res, 200, file.createReadStream());
+            return;
+          }
+
+          // downloading seems like a faster method.
+          send(res, 200, (await file.download())[0]);
+          return;
         }
       } else {
         return send(res, 403, forbiddenString);
