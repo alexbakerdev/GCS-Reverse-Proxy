@@ -71,8 +71,15 @@ module.exports = handleErrors(
 
         const bucket = bucketRef[bucketName];
         if (bucket) {
-          const data = await bucket.file(filePath).download();
-          return send(res, 200, data.toString());
+          const file = bucket.file(filePath);
+          const readStream = file.createReadStream()
+          const [ meta ] = await file.getMetadata();
+
+          res.setHeader('Content-Type', meta.contentType);
+          res.setHeader('Content-Length', meta.size)
+
+          send(res, 200, readStream);
+          return
         }
       } else {
         return send(res, 403, forbiddenString);
