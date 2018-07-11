@@ -18,20 +18,23 @@ This reverse proxy will serve a private object over http at the expected (relati
 
 ### Prerequisites
 
-* node lts/carbon
-* google cloud bucket
-* google cloud authenticated machine - Make sure the host machine is authenticated with gcloud, and setup with the correct project. 
+- node lts/carbon
+- google cloud bucket
+- google cloud authenticated machine - Make sure the host machine is authenticated with gcloud, and setup with the correct project.
 
 > N.B. (If you have the gcloud sdk installed run `gcloud info` in your shell to check you are logged in, and have the correct project id set).
 
 #### Environment
 
 the `TARGET_BUCKETS` env var expects a comma separated list of buckets, e.g:
+
 ```
 TARGET_BUCKETS='bucket-one,bucket-two'
 ```
 
-The server will throw unless one or more TARGET_BUCKETS are defined. 
+The server will throw unless one or more TARGET_BUCKETS are defined.
+
+Setting the `HISTORY` env var to true will start the server in history mode, for better SPA support. It will respond with the buckets root `index.html` file for any path that doesn't have a file extension.
 
 ### Run
 
@@ -43,6 +46,7 @@ TARGET_BUCKETS="bucket-name" npm start
 ### Usage
 
 Once the server is up and running, to access a private object in a bucket should make a get request to:
+
 ```
 <proxy-host>:<proxy-port>/<bucket-name>/<file-path>
 ```
@@ -69,8 +73,8 @@ From [Setting Up Authentication for Server to Server Production Applications](ht
 
 Because of the above, I recommend you use Compute Engine, Kubernetes Engine or App Engine where the authentication will be handled for you.
 
-### Docker 
+### Docker
 
-I've supplied a dockerfile for getting started without needing to install node. This will not work locally as it does not setup any authentication with google cloud sdk. 
+I've supplied a dockerfile for getting started without needing to install node. This will not work locally as it does not setup any authentication with google cloud sdk.
 
 However when deployed to a compute engine VM instance authentication is handled for you. To see how to deploy a Docker image on a vm instance, check out [this guide](https://cloud.google.com/compute/docs/containers/deploying-containers). Don't forget to set the `TARGET_BUCKETS` environment variable, which can be done by following [this guide](https://cloud.google.com/compute/docs/containers/configuring-options-to-run-containers#setting_environment_variables).
