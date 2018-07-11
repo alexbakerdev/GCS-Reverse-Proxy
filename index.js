@@ -3,6 +3,8 @@ const url = require("url");
 
 const { send, createError } = require("micro");
 const get = require("micro-get");
+const compress = require("micro-compress");
+
 const gcs = require("@google-cloud/storage");
 
 const Storage = gcs();
@@ -23,7 +25,8 @@ if (
   );
 }
 
-let allowedBuckets = process.env.TARGET_BUCKETS.split(",");
+const allowedBuckets = process.env.TARGET_BUCKETS.split(",");
+const historyMode = !!process.env.HISTORY;
 
 const handleErrors = fn => async (req, res) => {
   try {
@@ -50,48 +53,53 @@ function urlPathToFsPath(p) {
   // handle paths ending with / or without an extension
   // as directories, and map to an index.html
   if (parsedPath.ext === "") {
-    newPath = path.join(newPath, "index.html");
+    if (historyMode) {
+      return "index.html";
+    }
+    return path.join(newPath, "index.html");
   }
 
   return newPath;
 }
 
-module.exports = handleErrors(
-  get(async (req, res) => {
-    const matches = bucketPathRegexp.exec(req.url);
+module.exports = compress(
+  handleErrors(
+    get(async (req, res) => {
+      const matches = bucketPathRegexp.exec(req.url);
 
-    if (matches) {
-      const bucketName = matches[1];
-      if (allowedBuckets.includes(bucketName)) {
-        let filePath = urlPathToFsPath(matches[2]);
+      if (matches) {
+        const bucketName = matches[1];
+        if (allowedBuckets.includes(bucketName)) {
+          let filePath = urlPathToFsPath(matches[2]);
 
-        if (!bucketRef[bucketName]) {
-          bucketRef[bucketName] = await Storage.bucket(bucketName);
-        }
-
-        const bucket = bucketRef[bucketName];
-        if (bucket) {
-          const file = bucket.file(filePath);
-          const [ meta ] = await file.getMetadata();
-
-          res.setHeader('Content-Type', meta.contentType);
-          res.setHeader('Content-Length', meta.size)
-
-          // use streams if >~ 2MB/s to lower memory usage.
-          if (meta.size > 2000000) {          
-            send(res, 200, file.createReadStream());
-            return;
+          if (!bucketRef[bucketName]) {
+            bucketRef[bucketName] = await Storage.bucket(bucketName);
           }
 
-          // downloading seems like a faster method.
-          send(res, 200, (await file.download())[0]);
-          return;
-        }
-      } else {
-        return send(res, 403, forbiddenString);
-      }
-    }
+          const bucket = bucketRef[bucketName];
+          if (bucket) {
+            const file = bucket.file(filePath);
+            const [meta] = await file.getMetadata();
 
-    send(res, 404, notFoundString);
-  })
+            res.setHeader("Content-Type", meta.contentType);
+            res.setHeader("Content-Length", meta.size);
+            // res.setHeader("Content-Encoding", meta.contentEncoding);
+            // use streams if >~ 2MB/s to lower memory usage.
+            if (meta.size > 2000000) {
+              send(res, 200, file.createReadStream({ gzip: true }));
+              return;
+            }
+
+            // downloading seems like a faster method.
+            send(res, 200, (await file.download())[0]);
+            return;
+          }
+        } else {
+          return send(res, 403, forbiddenString);
+        }
+      }
+
+      send(res, 404, notFoundString);
+    })
+  )
 );
