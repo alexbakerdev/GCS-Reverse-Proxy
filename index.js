@@ -26,7 +26,8 @@ if (
 }
 
 const allowedBuckets = process.env.TARGET_BUCKETS.split(",");
-const historyMode = !!process.env.HISTORY;
+const historyMode =
+  process.env.HISTORY && process.env.HISTORY.toLowerCase() === "true";
 
 const handleErrors = fn => async (req, res) => {
   try {
