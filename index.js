@@ -28,6 +28,7 @@ if (
 const allowedBuckets = process.env.TARGET_BUCKETS.split(",");
 const historyMode =
   process.env.HISTORY && process.env.HISTORY.toLowerCase() === "true";
+const singleBucket = allowedBuckets.length === 1;
 
 const handleErrors = fn => async (req, res) => {
   try {
@@ -66,41 +67,64 @@ function urlPathToFsPath(p) {
 module.exports = compress(
   handleErrors(
     get(async (req, res) => {
-      const matches = bucketPathRegexp.exec(req.url);
-
-      if (matches) {
-        const bucketName = matches[1];
-        if (allowedBuckets.includes(bucketName)) {
-          let filePath = urlPathToFsPath(matches[2]);
-
-          if (!bucketRef[bucketName]) {
-            bucketRef[bucketName] = await Storage.bucket(bucketName);
-          }
-
-          const bucket = bucketRef[bucketName];
-          if (bucket) {
-            const file = bucket.file(filePath);
-            const [meta] = await file.getMetadata();
-
-            res.setHeader("Content-Type", meta.contentType);
-            res.setHeader("Content-Length", meta.size);
-            // res.setHeader("Content-Encoding", meta.contentEncoding);
-            // use streams if >~ 2MB/s to lower memory usage.
-            if (meta.size > 2000000) {
-              send(res, 200, file.createReadStream({ gzip: true }));
-              return;
-            }
-
-            // downloading seems like a faster method.
-            send(res, 200, (await file.download())[0]);
-            return;
-          }
-        } else {
-          return send(res, 403, forbiddenString);
-        }
+      if (singleBucket) {
+        return handleSingleBucket(req, res);
+      } else {
+        return handleMultiBucket(req, res);
       }
-
-      send(res, 404, notFoundString);
     })
   )
 );
+
+async function sendFile(res, bucket, filePath) {
+  const file = bucket.file(filePath);
+  const [meta] = await file.getMetadata();
+
+  res.setHeader("Content-Type", meta.contentType);
+  res.setHeader("Content-Length", meta.size);
+  // res.setHeader("Content-Encoding", meta.contentEncoding);
+  // use streams if >~ 2MB/s to lower memory usage.
+  if (meta.size > 2000000) {
+    send(res, 200, file.createReadStream({ gzip: true }));
+    return;
+  }
+
+  // downloading seems like a faster method.
+  send(res, 200, (await file.download())[0]);
+  return;
+}
+
+async function handleSingleBucket(req, res) {
+  const filePath = urlPathToFsPath(req.url);
+  const bucketName = allowedBuckets[0];
+
+  if (!bucketRef[bucketName]) {
+    bucketRef[bucketName] = await Storage.bucket(bucketName);
+  }
+
+  const bucket = bucketRef[bucketName];
+
+  return sendFile(res, bucket, filePath);
+}
+
+async function handleMultiBucket(req, res) {
+  const matches = bucketPathRegexp.exec(req.url);
+
+  if (matches) {
+    const bucketName = matches[1];
+    if (allowedBuckets.includes(bucketName)) {
+      let filePath = urlPathToFsPath(matches[2]);
+
+      if (!bucketRef[bucketName]) {
+        bucketRef[bucketName] = await Storage.bucket(bucketName);
+      }
+
+      const bucket = bucketRef[bucketName];
+      if (bucket) {
+        return sendFile(res, bucket, filePath);
+      }
+    } else {
+      return send(res, 403, forbiddenString);
+    }
+  }
+}
