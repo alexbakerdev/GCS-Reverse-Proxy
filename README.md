@@ -57,6 +57,10 @@ If the bucket requested is not in the list of TARGET_BUCKETS then it will return
 
 Only the get request method is supported currently.
 
+#### Single Bucket Mode
+
+Having a single bucket mode means there is no need to prefix all requests with a bucket-name path, so requesting `<proxy-host>:<proxy-port>/<file-path>` will request file path from the single target bucket.
+
 ### Dev
 
 This project uses [micro](https://github.com/zeit/micro), which means we get to use the excellent [micro-dev](https://github.com/zeit/micro-dev) tools, in development.
