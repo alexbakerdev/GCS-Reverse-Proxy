@@ -2,7 +2,19 @@ const path = require("path");
 const url = require("url");
 
 const { send, createError } = require("micro");
-const get = require("micro-get");
+const get = function(fn) {
+  return (req, res) => {
+    res.setHeader('Access-Control-Request-Method', ALLOWED_HTTP_METHOD)
+    const {method} = req
+    if (method !== 'GET') {
+      res.writeHead(405)
+      res.end('Method Not Allowed')
+      return
+    }
+    return fn(req, res)
+  }
+}
+
 const compress = require("micro-compress");
 
 const gcs = require("@google-cloud/storage");
