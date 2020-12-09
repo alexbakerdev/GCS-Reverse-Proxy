@@ -4,7 +4,7 @@ const url = require("url");
 const { send, createError } = require("micro");
 const get = function(fn) {
   return (req, res) => {
-    res.setHeader('Access-Control-Request-Method', ALLOWED_HTTP_METHOD)
+    res.setHeader('Access-Control-Request-Method', 'GET')
     const {method} = req
     if (method !== 'GET') {
       res.writeHead(405)
