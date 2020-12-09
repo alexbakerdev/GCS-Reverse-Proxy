@@ -16,8 +16,7 @@
   "dependencies": {
     "@google-cloud/storage": "^1.6.0",
     "micro": "^9.1.4",
-    "micro-compress": "^1.0.0",
-    "micro-get": "^0.1.1"
+    "micro-compress": "^1.0.0"
   },
   "devDependencies": {
     "micro-dev": "^2.2.2"
