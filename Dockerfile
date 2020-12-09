@@ -1,5 +1,5 @@
-FROM node:carbon-alpine
-RUN npm install -g npm@5.7
+FROM node:fermium-alpine
+RUN npm install -g npm
 
 ADD package*.json /code/
 WORKDIR /code
