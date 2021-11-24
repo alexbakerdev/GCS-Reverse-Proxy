@@ -1,4 +1,4 @@
-FROM node:fermium-alpine
+FROM node:gallium-alpine
 RUN npm install -g npm
 
 ADD package*.json /code/
