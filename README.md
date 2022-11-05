@@ -18,7 +18,7 @@ This reverse proxy will serve a private object over http at the expected (relati
 
 ### Prerequisites
 
-- node lts/carbon
+- Docker, or node 18+
 - google cloud bucket
 - google cloud authenticated machine - Make sure the host machine is authenticated with gcloud, and setup with the correct project.
 
@@ -35,6 +35,15 @@ TARGET_BUCKETS='bucket-one,bucket-two'
 The server will throw unless one or more TARGET_BUCKETS are defined.
 
 Setting the `HISTORY` env var to true will start the server in history mode, for better SPA support. It will respond with the buckets root `index.html` file for any path that doesn't have a file extension.
+
+If using containers and you want your container to use an application_default_credentials.json
+file then bind-mount it into the container and set the environment variable, eg.
+
+```
+GOOGLE_APPLICATION_CREDENTIALS=/application_default_credentials.json
+```
+
+You might obtain that with `gcloud auth application-default login` for example, and find it in `${HOME}/.config/gcloud`
 
 ### Run
 
@@ -79,6 +88,6 @@ Because of the above, I recommend you use Compute Engine, Kubernetes Engine or A
 
 ### Docker
 
-I've supplied a dockerfile for getting started without needing to install node. This will not work locally as it does not setup any authentication with google cloud sdk.
+I've supplied a dockerfile for getting started without needing to install node. This will not work locally as it does not setup any authentication with google cloud sdk.  See above in Environment for help getting it to work locally within Docker.
 
 However when deployed to a compute engine VM instance authentication is handled for you. To see how to deploy a Docker image on a vm instance, check out [this guide](https://cloud.google.com/compute/docs/containers/deploying-containers). Don't forget to set the `TARGET_BUCKETS` environment variable, which can be done by following [this guide](https://cloud.google.com/compute/docs/containers/configuring-options-to-run-containers#setting_environment_variables).
