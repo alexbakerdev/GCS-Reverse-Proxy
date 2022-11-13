@@ -1,13 +1,24 @@
+const {Storage} = require('@google-cloud/storage');
+const gcs = new Storage();
 const path = require("path");
 const url = require("url");
 
-const { send, createError } = require("micro");
-const get = require("micro-get");
+const { send } = require("micro");
+const get = function(fn) {
+  return (req, res) => {
+    res.setHeader('Access-Control-Request-Method', 'GET')
+    const {method} = req
+    if (method !== 'GET') {
+      res.writeHead(405)
+      res.end('Method Not Allowed')
+      return
+    }
+    return fn(req, res)
+  }
+}
+
 const compress = require("micro-compress");
 
-const gcs = require("@google-cloud/storage");
-
-const Storage = gcs();
 const bucketRef = {};
 
 const bucketPathRegexp = /^\/([^ \/]+)\/(.*)$/;
@@ -99,7 +110,7 @@ async function handleSingleBucket(req, res) {
   const bucketName = allowedBuckets[0];
 
   if (!bucketRef[bucketName]) {
-    bucketRef[bucketName] = await Storage.bucket(bucketName);
+    bucketRef[bucketName] = await gcs.bucket(bucketName);
   }
 
   const bucket = bucketRef[bucketName];
@@ -116,7 +127,7 @@ async function handleMultiBucket(req, res) {
       let filePath = urlPathToFsPath(matches[2]);
 
       if (!bucketRef[bucketName]) {
-        bucketRef[bucketName] = await Storage.bucket(bucketName);
+        bucketRef[bucketName] = await gcs.bucket(bucketName);
       }
 
       const bucket = bucketRef[bucketName];
