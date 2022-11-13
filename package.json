@@ -8,14 +8,14 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "micro -p ${PORT:-3000}",
+    "start": "micro -l tcp://0.0.0.0:${PORT:-3000}",
     "dev": "micro-dev"
   },
   "author": "Alex Baker me@xanderite.io",
   "license": "MIT",
   "dependencies": {
-    "@google-cloud/storage": "^1.7.0",
-    "micro": "^9.4.1",
+    "@google-cloud/storage": "^6.7.0",
+    "micro": "9.4.0",
     "micro-compress": "^1.0.0"
   },
   "devDependencies": {
